@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DSA Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div>
+          <h1>DSA Repetition Tracker</h1>
+          <p class="sub" id="datesub"></p>
+        </div>
+        <button class="btn sm ghost" data-act="theme" title="Theme">◐</button>
+      </div>
+
+      <div id="breakbanner"></div>
+
+      <h2>Due today <span class="count" id="duecount">0</span></h2>
+      <div id="dueList"></div>
+
+      <h2>System 1 — problems</h2>
+      <div id="blocksAccordion"></div>
+
+      <h2>System 2 — blocks</h2>
+      <div id="blockList"></div>
+
+      <h2>Actions</h2>
+      <div class="row" style="flex-wrap:wrap;gap:8px">
+        <button class="btn sm" data-act="addProblem">+ Add problem</button>
+        <button class="btn sm" data-act="addBlock">+ Add block</button>
+        <button class="btn sm" data-act="finishBlock">Finish a block</button>
+        <button class="btn sm" data-act="break">Take a break</button>
+      </div>
+
+      <p class="muted" id="fileStatus" style="margin-top:14px"></p>
+    </div>
+
+    <div id="modalRoot"></div>
+    <input type="file" id="fileInput" accept="application/json" style="display:none">
+
+    <script src="app.js"></script>
+  </body>
+</html>
