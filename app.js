@@ -416,7 +416,7 @@ function render() {
     let cls;
 
     if (!b.finished) {
-      st = "not started";
+      st = "in progress";
       cls = "";
     } else if (b.status === "locked") {
       st = "locked ✓";
