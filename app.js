@@ -22,6 +22,7 @@ const DAY = 86400000; // one day in milliseconds
 
 // Today as a local "YYYY-MM-DD" string (en-CA gives that exact format).
 const todayISO = () => new Date().toLocaleDateString("en-CA");
+const nowHM = () => new Date().toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
 
 // Parse a "YYYY-MM-DD" string into a local Date (no timezone surprises).
 function parseISO(s) {
@@ -398,7 +399,7 @@ function render() {
       <span class="chip ${p.p1done ? "on-pass" : ""}" style="cursor:default">+1</span>
       <span class="chip ${p.p3done ? "on-pass" : ""}" style="cursor:default">+3</span>
       <button class="linkbtn" data-act="note" data-id="${p.id}">note</button>
-      <button class="linkbtn" data-act="log" data-kind="p" data-id="${p.id}">log${p.log && p.log.length ? ` (${p.log.length})` : ""}</button></div>
+      <button class="linkbtn" data-act="log" data-kind="p" data-id="${p.id}">log</button></div>
       ${p.note ? `<div class="note">${esc(p.note)}</div>` : ""}`).join("");
     const complete = done === ps.length; // whole block fully reviewed → green ✓
 
@@ -429,7 +430,7 @@ function render() {
 
     return `<div class="card row" style="justify-content:space-between">
       <span style="font-weight:600;font-size:14px">${esc(b.name)}</span>
-      <span class="row" style="gap:10px"><button class="linkbtn" data-act="log" data-kind="b" data-id="${b.id}">log${b.log && b.log.length ? ` (${b.log.length})` : ""}</button><span class="tag ${cls}">${st}</span></span></div>`;
+      <span class="row" style="gap:10px"><button class="linkbtn" data-act="log" data-kind="b" data-id="${b.id}">log</button><span class="tag ${cls}">${st}</span></span></div>`;
   }).join("");
 
   // Footer status: where data is being saved.
@@ -603,7 +604,7 @@ function openLog(kind, id) {
   const entries = item.log || [];
 
   const list = entries.length
-    ? entries.map((e, i) => `<div class="pline"><span class="pn"><span style="color:var(--muted);font-size:11px">${fmt(e.ts)}</span><br>${esc(e.text)}</span>
+    ? entries.map((e, i) => `<div class="pline"><span class="pn"><span style="color:var(--muted);font-size:11px">${fmt(e.ts)}${e.tm ? ", " + e.tm : ""}</span><br>${esc(e.text)}</span>
         <button class="linkbtn" data-act="delLog" data-kind="${kind}" data-id="${id}" data-idx="${i}">delete</button></div>`).join("")
     : '<div class="empty">No log entries yet.</div>';
 
@@ -830,7 +831,7 @@ document.addEventListener("click", function (e) {
     if (!item.log) {
       item.log = [];
     }
-    item.log.unshift({ ts: todayISO(), text: txt }); // newest first
+    item.log.unshift({ ts: todayISO(), tm: nowHM(), text: txt }); // newest first
     save();
     openLog(el.dataset.kind, id); // refresh the modal with the new entry
     return;
