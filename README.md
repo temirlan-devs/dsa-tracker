@@ -40,6 +40,10 @@ Your marks are saved as you go, so a long block review can be paused and finishe
 
 Starting a break pauses all reviews. When you resume, the whole schedule is shifted **forward** so the oldest pending review lands on your return day, keeping the original gaps between reviews — you come back to a normal pace instead of a pile of overdue items. The shift is forward-only: if nothing is overdue, nothing moves.
 
+### Change log (per item)
+
+Each problem and block has a small **log** — a list of auto-dated notes. Use it to record any manual change you make (shifting a date, resolving something early, etc.), so if a date ever looks off later, you can see what you did and why. It's separate from a problem's learning `note`.
+
 ## Run it
 
 ### macOS

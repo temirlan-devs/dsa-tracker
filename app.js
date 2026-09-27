@@ -163,7 +163,7 @@ function loadLS() {
 function saveLS() {
   try {
     localStorage.setItem(LS, JSON.stringify(state));
-  } catch (e) {}
+  } catch (e) { }
 }
 
 // Load state from the local server's data.json, or null if unavailable.
@@ -176,7 +176,7 @@ async function serverLoad() {
         return d;
       }
     }
-  } catch (e) {}
+  } catch (e) { }
   return null;
 }
 
@@ -188,7 +188,7 @@ async function serverSave() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(state),
     });
-  } catch (e) {}
+  } catch (e) { }
 }
 
 // Single entry point after any change: persist everywhere, then re-render.
@@ -397,7 +397,8 @@ function render() {
     const rows = ps.map((p) => `<div class="pline"><span class="pn">${esc(p.name)}<br><span style="font-size:11px;color:var(--muted);font-weight:400">solved ${fmt(p.solved)}</span></span>
       <span class="chip ${p.p1done ? "on-pass" : ""}" style="cursor:default">+1</span>
       <span class="chip ${p.p3done ? "on-pass" : ""}" style="cursor:default">+3</span>
-      <button class="linkbtn" data-act="note" data-id="${p.id}">note</button></div>
+      <button class="linkbtn" data-act="note" data-id="${p.id}">note</button>
+      <button class="linkbtn" data-act="log" data-kind="p" data-id="${p.id}">log${p.log && p.log.length ? ` (${p.log.length})` : ""}</button></div>
       ${p.note ? `<div class="note">${esc(p.note)}</div>` : ""}`).join("");
     const complete = done === ps.length; // whole block fully reviewed → green ✓
 
@@ -427,7 +428,8 @@ function render() {
     }
 
     return `<div class="card row" style="justify-content:space-between">
-      <span style="font-weight:600;font-size:14px">${esc(b.name)}</span><span class="tag ${cls}">${st}</span></div>`;
+      <span style="font-weight:600;font-size:14px">${esc(b.name)}</span>
+      <span class="row" style="gap:10px"><button class="linkbtn" data-act="log" data-kind="b" data-id="${b.id}">log${b.log && b.log.length ? ` (${b.log.length})` : ""}</button><span class="tag ${cls}">${st}</span></span></div>`;
   }).join("");
 
   // Footer status: where data is being saved.
@@ -589,6 +591,37 @@ function openNote(id) {
   }, 60);
 }
 
+// Find a problem or block by kind ("p" or "b") and id.
+function itemById(kind, id) {
+  return kind === "p" ? findP(id) : findB(id);
+}
+
+// Change log for a problem or block: a list of auto-dated notes about manual
+// changes (date shifts, etc.), so odd-looking dates can be explained later.
+function openLog(kind, id) {
+  const item = itemById(kind, id);
+  const entries = item.log || [];
+
+  const list = entries.length
+    ? entries.map((e, i) => `<div class="pline"><span class="pn"><span style="color:var(--muted);font-size:11px">${fmt(e.ts)}</span><br>${esc(e.text)}</span>
+        <button class="linkbtn" data-act="delLog" data-kind="${kind}" data-id="${id}" data-idx="${i}">delete</button></div>`).join("")
+    : '<div class="empty">No log entries yet.</div>';
+
+  modal(`<h1 style="font-size:16px">Log: ${esc(item.name)}</h1>
+    <p class="muted">Track manual changes (date shifts, etc.). Each entry is auto-dated.</p>
+    ${list}
+    <input id="logInput" placeholder="e.g. shifted +3 because I was away" style="margin-top:10px">
+    <div class="foot"><button class="btn ghost" data-act="close">Close</button>
+    <button class="btn pass" data-act="addLog" data-kind="${kind}" data-id="${id}">Add entry</button></div>`);
+
+  setTimeout(() => {
+    const i = document.getElementById("logInput");
+    if (i) {
+      i.focus();
+    }
+  }, 60);
+}
+
 // Add a new problem (schedules its +1 and +3 from today).
 function openAddProblem() {
   const blocks = [...new Set(state.blocks.map((b) => b.name))];
@@ -728,7 +761,7 @@ document.addEventListener("click", function (e) {
     }
     try {
       localStorage.setItem("dsa_theme", nx);
-    } catch (_) {}
+    } catch (_) { }
     return;
   }
 
@@ -779,6 +812,38 @@ document.addEventListener("click", function (e) {
     p.note = i ? i.value.trim() : "";
     save();
     closeModal();
+    return;
+  }
+
+  if (a === "log") {
+    openLog(el.dataset.kind, id);
+    return;
+  }
+
+  if (a === "addLog") {
+    const item = itemById(el.dataset.kind, id);
+    const inp = document.getElementById("logInput");
+    const txt = inp ? inp.value.trim() : "";
+    if (!txt) {
+      return;
+    }
+    if (!item.log) {
+      item.log = [];
+    }
+    item.log.unshift({ ts: todayISO(), text: txt }); // newest first
+    save();
+    openLog(el.dataset.kind, id); // refresh the modal with the new entry
+    return;
+  }
+
+  if (a === "delLog") {
+    const item = itemById(el.dataset.kind, id);
+    const idx = Number(el.dataset.idx);
+    if (item.log) {
+      item.log.splice(idx, 1);
+    }
+    save();
+    openLog(el.dataset.kind, id);
     return;
   }
 
@@ -917,7 +982,7 @@ document.addEventListener("click", function (e) {
     if (t) {
       document.documentElement.setAttribute("data-theme", t);
     }
-  } catch (e) {}
+  } catch (e) { }
 })();
 
 // Load state (server file first when available, else localStorage, else defaults),
