@@ -398,9 +398,8 @@ function render() {
     const rows = ps.map((p) => `<div class="pline"><span class="pn">${esc(p.name)}<br><span style="font-size:11px;color:var(--muted);font-weight:400">solved ${fmt(p.solved)}</span></span>
       <span class="chip ${p.p1done ? "on-pass" : ""}" style="cursor:default">+1</span>
       <span class="chip ${p.p3done ? "on-pass" : ""}" style="cursor:default">+3</span>
-      <button class="linkbtn" data-act="note" data-id="${p.id}">note</button>
-      <button class="linkbtn" data-act="log" data-kind="p" data-id="${p.id}">log</button></div>
-      ${p.note ? `<div class="note">${esc(p.note)}</div>` : ""}`).join("");
+      <button class="linkbtn${p.note ? " has-note" : ""}" data-act="note" data-id="${p.id}">note</button>
+      <button class="linkbtn" data-act="log" data-kind="p" data-id="${p.id}">log</button></div>`).join("");
     const complete = done === ps.length; // whole block fully reviewed → green ✓
 
     return `<details data-bn="${esc(bn)}" ${openSet.has(bn) ? "open" : ""}>
