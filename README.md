@@ -13,14 +13,14 @@ A lightweight personal study tracker for DSA problems and review blocks. It uses
 
 The tracker uses two layers of spaced repetition. Anything due on a given day shows up under **Due today**.
 
-### System 1 - per problem
+### System 1 — per problem
 
-Every problem you add is reviewed twice, counted from the day you solved it:
+Every problem is reviewed twice, and the two reviews run **in sequence**:
 
-- **+1** - one day later
-- **+3** - three days later
+- **+1** — one day after you solve it.
+- **+3** — three days after you **pass** the +1 (not counted from the solve date).
 
-For each review you press **Pass** (solved it cleanly) or **Fail** (struggled). A fail simply reschedules that review to the next day; a pass marks it done. A problem is "fully reviewed" once both its +1 and +3 are passed.
+For each review you press **Pass** (solved it cleanly) or **Fail** (struggled). A fail reschedules that review to the next day; a pass marks it done. The **+3 stays hidden until the +1 is passed**, so a problem stuck on its +1 never jumps ahead to its +3. A problem is "fully reviewed" once both its +1 and +3 are passed.
 
 ### System 2 - per block
 

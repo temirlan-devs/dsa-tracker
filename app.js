@@ -116,7 +116,7 @@ function buildDefault() {
     solved: p[1],
     p1due: addDays(p[1], 1),
     p1done: false,
-    p3due: addDays(p[1], 3),
+    p3due: null, // scheduled once +1 is passed
     p3done: false,
     note: "",
   }));
@@ -219,7 +219,7 @@ function dueItems() {
     if (!p.p1done && isDue(p.p1due)) {
       out.push({ kind: "s1", stage: "+1", p });
     }
-    if (!p.p3done && isDue(p.p3due)) {
+    if (p.p1done && !p.p3done && p.p3due && isDue(p.p3due)) {
       out.push({ kind: "s1", stage: "+3", p });
     }
   }
@@ -254,7 +254,7 @@ function recycle(p) {
   p.p1done = false;
   p.p1due = addDays(todayISO(), 1);
   p.p3done = false;
-  p.p3due = addDays(todayISO(), 3);
+  p.p3due = null; // +3 rescheduled once the fresh +1 is passed
 }
 
 /* ------------------------------------------------------------------ *
@@ -310,7 +310,7 @@ function endBreak() {
       if (!p.p1done) {
         p.p1due = addDays(p.p1due, offset);
       }
-      if (!p.p3done) {
+      if (!p.p3done && p.p3due) {
         p.p3due = addDays(p.p3due, offset);
       }
     }
@@ -770,6 +770,7 @@ document.addEventListener("click", function (e) {
     const p = findP(id);
     if (stage === "+1") {
       p.p1done = true;
+      p.p3due = addDays(todayISO(), 3); // +3 starts 3 days after +1 is passed
     } else {
       p.p3done = true;
     }
@@ -883,7 +884,7 @@ document.addEventListener("click", function (e) {
       solved: t,
       p1due: addDays(t, 1),
       p1done: false,
-      p3due: addDays(t, 3),
+      p3due: null, // scheduled once +1 is passed
       p3done: false,
       note: "",
     });
