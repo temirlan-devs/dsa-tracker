@@ -40,9 +40,9 @@ Your marks are saved as you go, so a long block review can be paused and finishe
 
 Starting a break pauses all reviews. When you resume, the whole schedule is shifted **forward** so the oldest pending review lands on your return day, keeping the original gaps between reviews - you come back to a normal pace instead of a pile of overdue items. The shift is forward-only: if nothing is overdue, nothing moves.
 
-### Change log (per item)
+### History (per problem)
 
-Each problem and block has a small **log** - a list of auto-dated notes. Use it to record any manual change you make (shifting a date, resolving something early, etc.), so if a date ever looks off later, you can see what you did and why. It's separate from a problem's learning `note`.
+Each problem keeps an automatic **history** - a read-only, three-column table (Action · Date · Comment) that records every review event as it happens: when the problem was seeded or solved, each +1 and +3 pass or fail, and any block-review recycle. The Comment column always says what got (re)scheduled and when, so you can reconstruct exactly why a date looks the way it does. It's filled automatically - nothing to type - and is separate from a problem's learning `note` (a one-line "how to solve it" reminder you write yourself).
 
 ## Run it
 

@@ -109,17 +109,22 @@ function buildDefault() {
 
   // Turn each [name, solved] pair into a full problem record, with the
   // +1 and +3 review dates computed from the solved date.
-  const problems = P.map((p, i) => ({
-    id: "p" + i,
-    name: p[0],
-    block: "Arrays & Hashing",
-    solved: p[1],
-    p1due: addDays(p[1], 1),
-    p1done: false,
-    p3due: null, // scheduled once +1 is passed
-    p3done: false,
-    note: "",
-  }));
+  const problems = P.map((p, i) => {
+    const p1 = addDays(p[1], 1);
+    return {
+      id: "p" + i,
+      name: p[0],
+      block: "Arrays & Hashing",
+      solved: p[1],
+      p1due: p1,
+      p1done: false,
+      p3due: null, // scheduled once +1 is passed
+      p3done: false,
+      note: "",
+      // Automatic event trail (newest first); seeded problems start with this.
+      history: [{ action: "seeded", ts: p[1], tm: "", comment: "+1 scheduled to " + fmt(p1) }],
+    };
+  });
 
   // The starting block, already finished, so its +7/+30 reviews are scheduled.
   const blocks = [{
@@ -248,6 +253,17 @@ function findB(id) {
   return state.blocks.find((x) => x.id === id);
 }
 
+// Append an automatic event to a problem's history (newest first). This is the
+// audit trail shown by the "history" button: seeded / solved, every +1 and +3
+// pass or fail, and block-review recycles — each stamped with the date, time,
+// and what got (re)scheduled as a result.
+function logHistory(p, action, comment) {
+  if (!p.history) {
+    p.history = [];
+  }
+  p.history.unshift({ action: action, ts: todayISO(), tm: nowHM(), comment: comment || "" });
+}
+
 // Drop a problem back into System 1 (used when it fails a block review):
 // its +1 and +3 are rescheduled from today and marked not done.
 function recycle(p) {
@@ -255,6 +271,7 @@ function recycle(p) {
   p.p1due = addDays(todayISO(), 1);
   p.p3done = false;
   p.p3due = null; // +3 rescheduled once the fresh +1 is passed
+  logHistory(p, "recycled", "block review failed · +1 scheduled to " + fmt(p.p1due));
 }
 
 /* ------------------------------------------------------------------ *
@@ -399,7 +416,7 @@ function render() {
       <span class="chip ${p.p1done ? "on-pass" : ""}" style="cursor:default">+1</span>
       <span class="chip ${p.p3done ? "on-pass" : ""}" style="cursor:default">+3</span>
       <button class="linkbtn${p.note ? " has-note" : ""}" data-act="note" data-id="${p.id}">note</button>
-      <button class="linkbtn" data-act="log" data-kind="p" data-id="${p.id}">log</button></div>`).join("");
+      <button class="linkbtn" data-act="history" data-id="${p.id}">history</button></div>`).join("");
     const complete = done === ps.length; // whole block fully reviewed → green ✓
 
     return `<details data-bn="${esc(bn)}" ${openSet.has(bn) ? "open" : ""}>
@@ -429,7 +446,7 @@ function render() {
 
     return `<div class="card row" style="justify-content:space-between">
       <span style="font-weight:600;font-size:14px">${esc(b.name)}</span>
-      <span class="row" style="gap:10px"><button class="linkbtn" data-act="log" data-kind="b" data-id="${b.id}">log</button><span class="tag ${cls}">${st}</span></span></div>`;
+      <span class="tag ${cls}">${st}</span></div>`;
   }).join("");
 
   // Footer status: where data is being saved.
@@ -591,35 +608,30 @@ function openNote(id) {
   }, 60);
 }
 
-// Find a problem or block by kind ("p" or "b") and id.
-function itemById(kind, id) {
-  return kind === "p" ? findP(id) : findB(id);
-}
+// Read-only history modal for a problem: the automatic event trail rendered as
+// a three-column table (Action · Date · Comment), newest first. Pass events are
+// tinted green, fails red, everything else muted.
+function openHistory(id) {
+  const p = findP(id);
+  const entries = p.history || [];
 
-// Change log for a problem or block: a list of auto-dated notes about manual
-// changes (date shifts, etc.), so odd-looking dates can be explained later.
-function openLog(kind, id) {
-  const item = itemById(kind, id);
-  const entries = item.log || [];
+  const rows = entries.map((e) => {
+    const cls = e.action.includes("pass") ? "ok" : e.action.includes("fail") ? "bad" : "neu";
+    return `<tr>
+      <td class="hact ${cls}">${esc(e.action)}</td>
+      <td class="hdate">${fmt(e.ts)}${e.tm ? ", " + e.tm : ""}</td>
+      <td class="hcom">${esc(e.comment)}</td>
+    </tr>`;
+  }).join("");
 
-  const list = entries.length
-    ? entries.map((e, i) => `<div class="pline"><span class="pn"><span style="color:var(--muted);font-size:11px">${fmt(e.ts)}${e.tm ? ", " + e.tm : ""}</span><br>${esc(e.text)}</span>
-        <button class="linkbtn" data-act="delLog" data-kind="${kind}" data-id="${id}" data-idx="${i}">delete</button></div>`).join("")
-    : '<div class="empty">No log entries yet.</div>';
+  const body = entries.length
+    ? `<table class="htable"><thead><tr><th>Action</th><th>Date</th><th>Comment</th></tr></thead><tbody>${rows}</tbody></table>`
+    : '<div class="empty">No history yet.</div>';
 
-  modal(`<h1 style="font-size:16px">Log: ${esc(item.name)}</h1>
-    <p class="muted">Track manual changes (date shifts, etc.). Each entry is auto-dated.</p>
-    ${list}
-    <input id="logInput" placeholder="e.g. shifted +3 because I was away" style="margin-top:10px">
-    <div class="foot"><button class="btn ghost" data-act="close">Close</button>
-    <button class="btn pass" data-act="addLog" data-kind="${kind}" data-id="${id}">Add entry</button></div>`);
-
-  setTimeout(() => {
-    const i = document.getElementById("logInput");
-    if (i) {
-      i.focus();
-    }
-  }, 60);
+  modal(`<h1 style="font-size:16px">History: ${esc(p.name)}</h1>
+    <p class="muted">Automatic record of every review event for this problem (newest first).</p>
+    ${body}
+    <div class="foot"><button class="btn ghost" data-act="close">Close</button></div>`);
 }
 
 // Add a new problem (schedules its +1 and +3 from today).
@@ -771,8 +783,10 @@ document.addEventListener("click", function (e) {
     if (stage === "+1") {
       p.p1done = true;
       p.p3due = addDays(todayISO(), 3); // +3 starts 3 days after +1 is passed
+      logHistory(p, "+1 pass", "+3 scheduled to " + fmt(p.p3due));
     } else {
       p.p3done = true;
+      logHistory(p, "+3 pass", "fully reviewed");
     }
     save();
     return;
@@ -783,8 +797,10 @@ document.addEventListener("click", function (e) {
     const p = findP(id);
     if (stage === "+1") {
       p.p1due = addDays(todayISO(), 1);
+      logHistory(p, "+1 fail", "+1 rescheduled to " + fmt(p.p1due));
     } else {
       p.p3due = addDays(todayISO(), 1);
+      logHistory(p, "+3 fail", "+3 rescheduled to " + fmt(p.p3due));
     }
     save();
     return;
@@ -816,35 +832,8 @@ document.addEventListener("click", function (e) {
     return;
   }
 
-  if (a === "log") {
-    openLog(el.dataset.kind, id);
-    return;
-  }
-
-  if (a === "addLog") {
-    const item = itemById(el.dataset.kind, id);
-    const inp = document.getElementById("logInput");
-    const txt = inp ? inp.value.trim() : "";
-    if (!txt) {
-      return;
-    }
-    if (!item.log) {
-      item.log = [];
-    }
-    item.log.unshift({ ts: todayISO(), tm: nowHM(), text: txt }); // newest first
-    save();
-    openLog(el.dataset.kind, id); // refresh the modal with the new entry
-    return;
-  }
-
-  if (a === "delLog") {
-    const item = itemById(el.dataset.kind, id);
-    const idx = Number(el.dataset.idx);
-    if (item.log) {
-      item.log.splice(idx, 1);
-    }
-    save();
-    openLog(el.dataset.kind, id);
+  if (a === "history") {
+    openHistory(id);
     return;
   }
 
@@ -877,16 +866,18 @@ document.addEventListener("click", function (e) {
 
     const bl = document.getElementById("apBlock").value;
     const t = todayISO();
+    const p1 = addDays(t, 1);
     state.problems.push({
       id: "p" + Date.now(),
       name: n,
       block: bl,
       solved: t,
-      p1due: addDays(t, 1),
+      p1due: p1,
       p1done: false,
       p3due: null, // scheduled once +1 is passed
       p3done: false,
       note: "",
+      history: [{ action: "solved", ts: t, tm: nowHM(), comment: "+1 scheduled to " + fmt(p1) }],
     });
     closeModal();
     save();

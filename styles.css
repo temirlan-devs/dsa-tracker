@@ -395,3 +395,52 @@ select {
 }
 
 .linkbtn.has-note { color: var(--accent, #6ea8fe); font-weight: 600; }
+
+/* History modal: three-column event table (Action · Date · Comment). */
+.htable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.htable th {
+  text-align: left;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 11px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.htable td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.htable tr:last-child td {
+  border-bottom: none;
+}
+
+.htable .hact {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.htable .hact.ok {
+  color: var(--accent);
+}
+
+.htable .hact.bad {
+  color: var(--danger);
+}
+
+.htable .hact.neu {
+  color: var(--muted);
+}
+
+.htable .hdate {
+  color: var(--muted);
+  white-space: nowrap;
+}
