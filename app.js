@@ -121,6 +121,7 @@ function buildDefault() {
       p3due: null, // scheduled once +1 is passed
       p3done: false,
       note: "",
+      code: "", // your working solution (filled via the "code" button)
       // Automatic event trail (newest first); seeded problems start with this.
       history: [{ action: "seeded", ts: p[1], tm: "", comment: "+1 scheduled to " + fmt(p1) }],
     };
@@ -416,6 +417,7 @@ function render() {
       <span class="chip ${p.p1done ? "on-pass" : ""}" style="cursor:default">+1</span>
       <span class="chip ${p.p3done ? "on-pass" : ""}" style="cursor:default">+3</span>
       <button class="linkbtn${p.note ? " has-note" : ""}" data-act="note" data-id="${p.id}">note</button>
+      <button class="linkbtn${p.code ? " has-code" : ""}" data-act="code" data-id="${p.id}">code</button>
       <button class="linkbtn" data-act="history" data-id="${p.id}">history</button></div>`).join("");
     const complete = done === ps.length; // whole block fully reviewed → green ✓
 
@@ -604,6 +606,34 @@ function openNote(id) {
     const i = document.getElementById("noteInput");
     if (i) {
       i.focus();
+    }
+  }, 60);
+}
+
+// Code editor for a problem: a monospace textarea holding the working solution
+// you solved it with. Saved verbatim (whitespace preserved, never trimmed).
+function openCode(id) {
+  const p = findP(id);
+
+  modal(`<h1 style="font-size:16px">Code: ${esc(p.name)}</h1>
+    <p class="muted">The solution you solved it with. Paste or edit — saved to this problem.</p>
+    <textarea id="codeInput" class="codearea" spellcheck="false" wrap="off" placeholder="// paste your working solution here">${esc(p.code || "")}</textarea>
+    <div class="foot"><button class="btn ghost" data-act="close">Cancel</button>
+    <button class="btn pass" data-act="saveCode" data-id="${id}">Save</button></div>`);
+
+  setTimeout(() => {
+    const ta = document.getElementById("codeInput");
+    if (ta && window.CodeMirror) {
+      window._cm = CodeMirror.fromTextArea(ta, {
+        mode: "text/x-java",
+        theme: "material-darker",
+        lineNumbers: true,
+        tabSize: 2,
+        indentUnit: 2,
+      });
+      window._cm.focus();
+    } else if (ta) {
+      ta.focus();
     }
   }, 60);
 }
@@ -832,6 +862,21 @@ document.addEventListener("click", function (e) {
     return;
   }
 
+  if (a === "code") {
+    openCode(id);
+    return;
+  }
+
+  // Save the solution code — kept verbatim (no trim, so indentation survives).
+  if (a === "saveCode") {
+    const p = findP(id);
+    p.code = window._cm ? window._cm.getValue() : (document.getElementById("codeInput") ? document.getElementById("codeInput").value : "");
+    window._cm = null;
+    save();
+    closeModal();
+    return;
+  }
+
   if (a === "history") {
     openHistory(id);
     return;
@@ -877,6 +922,7 @@ document.addEventListener("click", function (e) {
       p3due: null, // scheduled once +1 is passed
       p3done: false,
       note: "",
+      code: "",
       history: [{ action: "solved", ts: t, tm: nowHM(), comment: "+1 scheduled to " + fmt(p1) }],
     });
     closeModal();

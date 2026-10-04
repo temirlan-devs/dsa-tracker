@@ -444,3 +444,20 @@ select {
   color: var(--muted);
   white-space: nowrap;
 }
+
+/* Code editor: monospace textarea, horizontal scroll (no soft-wrap). */
+.codearea {
+  width: 100%;
+  min-height: 320px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+  font-size: 12px;
+  line-height: 1.45;
+  tab-size: 2;
+  resize: vertical;
+  white-space: pre;
+}
+
+.linkbtn.has-code {
+  color: var(--accent, #6ea8fe);
+  font-weight: 600;
+}

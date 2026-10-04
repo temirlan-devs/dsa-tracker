@@ -44,6 +44,10 @@ Starting a break pauses all reviews. When you resume, the whole schedule is shif
 
 Each problem keeps an automatic **history** - a read-only, three-column table (Action · Date · Comment) that records every review event as it happens: when the problem was seeded or solved, each +1 and +3 pass or fail, and any block-review recycle. The Comment column always says what got (re)scheduled and when, so you can reconstruct exactly why a date looks the way it does. It's filled automatically - nothing to type - and is separate from a problem's learning `note` (a one-line "how to solve it" reminder you write yourself).
 
+### Code (per problem)
+
+Each problem can also store the **code** you solved it with. The **code** button opens a monospace editor; paste or edit your working solution and it's saved to that problem (verbatim - indentation preserved). The button tints when a solution is stored. Handy for re-reading your own accepted approach when a review comes due.
+
 ## Run it
 
 ### macOS
