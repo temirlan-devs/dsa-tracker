@@ -134,7 +134,7 @@ function buildDefault() {
     finished: "2026-09-25",
     s7due: addDays("2026-09-25", 7),
     s7done: false,
-    s30due: addDays("2026-09-25", 30),
+    s30due: null,
     s30done: false,
     status: "review",
   }];
@@ -560,6 +560,7 @@ function submitReview() {
     b.retry = false;
     if (review.stage === "+7") {
       b.s7done = true;
+      b.s30due = addDays(todayISO(), 30);   // +30 now counts from when +7 passed
     } else {
       b.s30done = true;
       b.status = "locked";
@@ -708,7 +709,7 @@ function openFinishBlock() {
     return;
   }
 
-  modal(`<h1 style="font-size:16px">Finish a block</h1><p class="muted">Starts its +7 and +30 reviews from today.</p>
+  modal(`<h1 style="font-size:16px">Finish a block</h1><p class="muted">Starts its +7 review from today (+30 is scheduled once you pass +7).</p>
     <select id="fbSel">${opts}</select><div class="foot"><button class="btn ghost" data-act="close">Cancel</button>
     <button class="btn pass" data-act="doFinishBlock">Finish</button></div>`);
 }
@@ -968,7 +969,7 @@ document.addEventListener("click", function (e) {
     const t = todayISO();
     b.finished = t;
     b.s7due = addDays(t, 7);
-    b.s30due = addDays(t, 30);
+    b.s30due = null;
     b.status = "review";
     closeModal();
     save();
