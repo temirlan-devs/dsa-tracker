@@ -445,7 +445,30 @@ select {
   white-space: nowrap;
 }
 
-/* Code editor: monospace textarea, horizontal scroll (no soft-wrap). */
+/* Code editor: Python/Java tabs + monospace area (no soft-wrap). */
+.codetabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.codetab {
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 6px 6px 0 0;
+  cursor: pointer;
+}
+
+.codetab.on {
+  color: var(--accent);
+  background: var(--accent2);
+  border-color: var(--accent);
+}
+
 .codearea {
   width: 100%;
   min-height: 320px;

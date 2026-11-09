@@ -83,7 +83,19 @@ class TrackerHandler(SimpleHTTPRequestHandler):
 
     def log_message(self, format, *args):
         return
-
+    
+def open_in_chrome(url):
+    """Open the tracker in Chrome, reusing the running window as a new tab."""
+    if os.name == "nt":  # Windows
+        # `start chrome <url>` hands the URL to the existing Chrome instance
+        # (a new tab) instead of launching a second one.
+        if os.system(f'start "" chrome "{url}"') == 0:
+            return
+    try:
+        webbrowser.get("chrome").open_new_tab(url)
+        return
+    except Exception:
+        webbrowser.open(url)  # last resort: default browser
 
 def main():
     os.chdir(DIR)
@@ -95,8 +107,7 @@ def main():
         print(f"Open: {url}")
         print(f"Data file: {DATA_FILE}")
         print("Press Ctrl+C here to stop.")
-        threading.Timer(0.6, lambda: webbrowser.open(url)).start()
-
+        threading.Timer(0.6, lambda: open_in_chrome(url)).start()
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:

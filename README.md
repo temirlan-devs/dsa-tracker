@@ -24,10 +24,10 @@ For each review you press **Pass** (solved it cleanly) or **Fail** (struggled). 
 
 ### System 2 - per block
 
-A *block* is a topic (e.g. "Arrays & Hashing"). When you finish a block, it gets two whole-block reviews, counted from the finish date:
+A *block* is a topic (e.g. "Arrays & Hashing"). When you finish a block, it gets two whole-block reviews:
 
-- **+7** - one week later
-- **+30** - one month later
+- **+7** - one week after you finish the block.
+- **+30** - one month after you **pass** the +7 (not counted from the finish date).
 
 A block review asks you to re-solve every problem in the block and mark each Pass/Fail. The outcome follows an **80% rule**:
 
@@ -46,7 +46,7 @@ Each problem keeps an automatic **history** - a read-only, three-column table (A
 
 ### Code (per problem)
 
-Each problem can also store the **code** you solved it with. The **code** button opens a monospace editor; paste or edit your working solution and it's saved to that problem (verbatim - indentation preserved). The button tints when a solution is stored. Handy for re-reading your own accepted approach when a review comes due.
+Each problem can also store the **code** you solved it with. The **code** button opens a monospace editor with two tabs - **Python** (shown first) and **Java** - so you can keep a solution in each language side by side. Paste or edit and it's saved to that problem, verbatim, indentation preserved. The button tints when either language has a solution stored. Handy for re-reading your own accepted approach when a review comes due.
 
 ## Run it
 
@@ -74,11 +74,11 @@ Each problem can also store the **code** you solved it with. The **code** button
 python3 server.py
 ```
 
-The server opens the app in your default browser and serves the project from the same folder.
+The server opens the app in Chrome - reusing your existing window as a new tab - and serves the project from the same folder. If Chrome isn't found, it falls back to your default browser.
 
 ## Data file
 
-The app stores its data in `data.json` alongside the project files. The JSON shape is kept the same as the original project so the tracker continues to work without any migration step.
+The app stores its data in `data.json` alongside the project files. When the data format changes, the app migrates your file automatically on load - there's nothing for you to do.
 
 ## Move it between machines
 
